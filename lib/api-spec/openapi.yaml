@@ -1,22 +1,32 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Traffic Assistant Admin API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: crowdsourcing
+    description: Crowdsourcing reports management
+  - name: rules
+    description: Rule engine management
+  - name: admins
+    description: Admin account management
+  - name: users
+    description: User profile management
+  - name: models
+    description: AI model OTA management
+  - name: evidence
+    description: Evidence image storage
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +34,466 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /crowdsourcing/reports:
+    get:
+      operationId: listCrowdsourcingReports
+      tags: [crowdsourcing]
+      summary: List crowdsourcing reports
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of reports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrowdsourcingReportList"
+  /crowdsourcing/reports/{id}:
+    get:
+      operationId: getCrowdsourcingReport
+      tags: [crowdsourcing]
+      summary: Get a report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Report detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrowdsourcingReport"
+    patch:
+      operationId: updateCrowdsourcingReport
+      tags: [crowdsourcing]
+      summary: Approve or reject a report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCrowdsourcingReportBody"
+      responses:
+        "200":
+          description: Updated report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrowdsourcingReport"
+
+  /crowdsourcing/sign-reports:
+    get:
+      operationId: listSignReports
+      tags: [crowdsourcing]
+      summary: List sign error/missing reports
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, hidden, visible]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of sign reports
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignReportList"
+  /crowdsourcing/sign-reports/{id}:
+    patch:
+      operationId: updateSignReport
+      tags: [crowdsourcing]
+      summary: Toggle sign visibility
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSignReportBody"
+      responses:
+        "200":
+          description: Updated sign report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignReport"
+
+  /crowdsourcing/stats:
+    get:
+      operationId: getCrowdsourcingStats
+      tags: [crowdsourcing]
+      summary: Get crowdsourcing statistics
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrowdsourcingStats"
+
+  /rules:
+    get:
+      operationId: listRules
+      tags: [rules]
+      summary: List rule engine rules
+      parameters:
+        - name: vehicleType
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of rules
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RuleList"
+    post:
+      operationId: createRule
+      tags: [rules]
+      summary: Create a rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRuleBody"
+      responses:
+        "201":
+          description: Created rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rule"
+  /rules/{id}:
+    get:
+      operationId: getRule
+      tags: [rules]
+      summary: Get a rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Rule detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rule"
+    patch:
+      operationId: updateRule
+      tags: [rules]
+      summary: Update a rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRuleBody"
+      responses:
+        "200":
+          description: Updated rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Rule"
+    delete:
+      operationId: deleteRule
+      tags: [rules]
+      summary: Delete a rule
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /admins:
+    get:
+      operationId: listAdmins
+      tags: [admins]
+      summary: List admins
+      responses:
+        "200":
+          description: List of admins
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminList"
+    post:
+      operationId: createAdmin
+      tags: [admins]
+      summary: Create an admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdminBody"
+      responses:
+        "201":
+          description: Created admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admin"
+  /admins/{id}:
+    patch:
+      operationId: updateAdmin
+      tags: [admins]
+      summary: Update admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdminBody"
+      responses:
+        "200":
+          description: Updated admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admin"
+    delete:
+      operationId: deleteAdmin
+      tags: [admins]
+      summary: Delete admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List users
+      parameters:
+        - name: vehicleType
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /users/{id}:
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /models:
+    get:
+      operationId: listModels
+      tags: [models]
+      summary: List AI models
+      responses:
+        "200":
+          description: List of models
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelList"
+    post:
+      operationId: createModel
+      tags: [models]
+      summary: Upload a new model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateModelBody"
+      responses:
+        "201":
+          description: Created model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Model"
+  /models/{id}/deploy:
+    post:
+      operationId: deployModel
+      tags: [models]
+      summary: Deploy model OTA to all devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deploy started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Model"
+
+  /evidence:
+    get:
+      operationId: listEvidence
+      tags: [evidence]
+      summary: List evidence images
+      parameters:
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of evidence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvidenceList"
+
+  /evidence/stats:
+    get:
+      operationId: getEvidenceStats
+      tags: [evidence]
+      summary: Get evidence statistics by location
+      responses:
+        "200":
+          description: Evidence stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvidenceStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +504,516 @@ components:
       required:
         - status
 
+    CrowdsourcingReport:
+      type: object
+      properties:
+        id:
+          type: integer
+        lat:
+          type: number
+        lng:
+          type: number
+        imageUrl:
+          type: ["string", "null"]
+        signCode:
+          type: string
+        signType:
+          type: string
+        confidenceScore:
+          type: number
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        submittedBy:
+          type: string
+        submittedAt:
+          type: string
+        reviewedAt:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - id
+        - lat
+        - lng
+        - signCode
+        - signType
+        - confidenceScore
+        - status
+        - submittedBy
+        - submittedAt
+
+    CrowdsourcingReportList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrowdsourcingReport"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - items
+        - total
+        - page
+        - limit
+
+    UpdateCrowdsourcingReportBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+        notes:
+          type: string
+      required:
+        - status
+
+    SignReport:
+      type: object
+      properties:
+        id:
+          type: integer
+        signId:
+          type: integer
+        signCode:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        reportCount:
+          type: integer
+        reportType:
+          type: string
+          enum: [missing, error]
+        visibility:
+          type: string
+          enum: [visible, hidden]
+        lastReportedAt:
+          type: string
+      required:
+        - id
+        - signId
+        - signCode
+        - lat
+        - lng
+        - reportCount
+        - reportType
+        - visibility
+        - lastReportedAt
+
+    SignReportList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignReport"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    UpdateSignReportBody:
+      type: object
+      properties:
+        visibility:
+          type: string
+          enum: [visible, hidden]
+      required:
+        - visibility
+
+    CrowdsourcingStats:
+      type: object
+      properties:
+        totalPending:
+          type: integer
+        totalApproved:
+          type: integer
+        totalRejected:
+          type: integer
+        approvalRate:
+          type: number
+        recentActivity:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+              count:
+                type: integer
+            required:
+              - date
+              - count
+      required:
+        - totalPending
+        - totalApproved
+        - totalRejected
+        - approvalRate
+        - recentActivity
+
+    Rule:
+      type: object
+      properties:
+        id:
+          type: integer
+        signCode:
+          type: string
+        signContent:
+          type: string
+        vehicleType:
+          type: string
+          enum: [car, truck, motorcycle, bicycle, all]
+        warningMessage:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - signCode
+        - signContent
+        - vehicleType
+        - warningMessage
+        - isActive
+        - createdAt
+        - updatedAt
+
+    RuleList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Rule"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    CreateRuleBody:
+      type: object
+      properties:
+        signCode:
+          type: string
+        signContent:
+          type: string
+        vehicleType:
+          type: string
+          enum: [car, truck, motorcycle, bicycle, all]
+        warningMessage:
+          type: string
+        isActive:
+          type: boolean
+      required:
+        - signCode
+        - signContent
+        - vehicleType
+        - warningMessage
+
+    UpdateRuleBody:
+      type: object
+      properties:
+        signCode:
+          type: string
+        signContent:
+          type: string
+        vehicleType:
+          type: string
+          enum: [car, truck, motorcycle, bicycle, all]
+        warningMessage:
+          type: string
+        isActive:
+          type: boolean
+
+    Admin:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        district:
+          type: string
+        geoPolygon:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [super_admin, district_admin]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - district
+        - role
+        - isActive
+        - createdAt
+
+    AdminList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Admin"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    CreateAdminBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        district:
+          type: string
+        geoPolygon:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, district_admin]
+      required:
+        - name
+        - email
+        - district
+        - role
+
+    UpdateAdminBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        district:
+          type: string
+        geoPolygon:
+          type: string
+        role:
+          type: string
+          enum: [super_admin, district_admin]
+        isActive:
+          type: boolean
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        vehicleType:
+          type: string
+          enum: [car, truck, motorcycle, bicycle]
+        isActive:
+          type: boolean
+        reportCount:
+          type: integer
+        registeredAt:
+          type: string
+      required:
+        - id
+        - name
+        - email
+        - vehicleType
+        - isActive
+        - reportCount
+        - registeredAt
+
+    UserList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    CreateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        vehicleType:
+          type: string
+          enum: [car, truck, motorcycle, bicycle]
+      required:
+        - name
+        - email
+        - vehicleType
+
+    UpdateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        vehicleType:
+          type: string
+          enum: [car, truck, motorcycle, bicycle]
+        isActive:
+          type: boolean
+
+    Model:
+      type: object
+      properties:
+        id:
+          type: integer
+        version:
+          type: string
+        filename:
+          type: string
+        releaseNote:
+          type: string
+        status:
+          type: string
+          enum: [draft, deploying, deployed, failed]
+        deployedAt:
+          type: ["string", "null"]
+        deviceCount:
+          type: integer
+        uploadedAt:
+          type: string
+      required:
+        - id
+        - version
+        - filename
+        - releaseNote
+        - status
+        - deviceCount
+        - uploadedAt
+
+    ModelList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Model"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    CreateModelBody:
+      type: object
+      properties:
+        version:
+          type: string
+        filename:
+          type: string
+        releaseNote:
+          type: string
+      required:
+        - version
+        - filename
+        - releaseNote
+
+    Evidence:
+      type: object
+      properties:
+        id:
+          type: integer
+        imageUrl:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        capturedAt:
+          type: string
+        deviceId:
+          type: string
+        signCode:
+          type: ["string", "null"]
+        decision:
+          type: string
+          enum: [pending, approved, rejected]
+      required:
+        - id
+        - imageUrl
+        - lat
+        - lng
+        - capturedAt
+        - deviceId
+        - decision
+
+    EvidenceList:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Evidence"
+        total:
+          type: integer
+      required:
+        - items
+        - total
+
+    EvidenceStats:
+      type: object
+      properties:
+        totalImages:
+          type: integer
+        approvedCount:
+          type: integer
+        pendingCount:
+          type: integer
+        heatmapPoints:
+          type: array
+          items:
+            type: object
+            properties:
+              lat:
+                type: number
+              lng:
+                type: number
+              weight:
+                type: integer
+            required:
+              - lat
+              - lng
+              - weight
+      required:
+        - totalImages
+        - approvedCount
+        - pendingCount
+        - heatmapPoints
