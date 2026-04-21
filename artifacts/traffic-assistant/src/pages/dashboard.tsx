@@ -3,9 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { CheckCircle2, XCircle, Clock, AlertTriangle, ArrowRight, Activity, Cpu } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, ArrowRight, Activity, Cpu, Map } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { lazy, Suspense } from "react";
+
+const MapView = lazy(() => import("@/components/MapView"));
 
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useGetCrowdsourcingStats();
@@ -13,9 +16,17 @@ export default function Dashboard() {
     status: "pending",
     limit: 5
   });
+  const { data: allReports } = useListCrowdsourcingReports({ limit: 100 });
   const { data: modelsData, isLoading: modelsLoading } = useListModels();
 
   const totalReports = stats ? stats.totalPending + stats.totalApproved + stats.totalRejected : 0;
+
+  const mapPoints = (allReports?.items ?? []).map((r) => ({
+    lat: r.lat,
+    lng: r.lng,
+    label: `${r.signCode} - ${r.signType}`,
+    status: r.status as "pending" | "approved" | "rejected",
+  }));
 
   return (
     <div className="space-y-6">
@@ -78,6 +89,29 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Map */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-3 space-y-0">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Map className="w-4 h-4 text-blue-600" />
+              Bản đồ báo cáo thực địa
+            </CardTitle>
+            <CardDescription>Vị trí các báo cáo biển báo từ cộng đồng</CardDescription>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-slate-500">
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" /> Chờ duyệt</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" /> Đã duyệt</span>
+            <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" /> Từ chối</span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0 overflow-hidden rounded-b-lg">
+          <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-slate-50 text-slate-400 text-sm">Đang tải bản đồ...</div>}>
+            <MapView points={mapPoints} height="400px" />
+          </Suspense>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
         {/* Recent Pending Reports */}
