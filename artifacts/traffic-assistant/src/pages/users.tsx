@@ -54,7 +54,7 @@ export default function Users() {
     }
   };
 
-  const filteredUsers = data?.items.filter(user => 
+  const filteredUsers = (data?.items || []).filter((user: any) => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (user.phone && user.phone.includes(searchTerm))
@@ -106,7 +106,7 @@ export default function Users() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((user) => (
+                (filteredUsers || []).map((user: any) => (
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="font-medium text-slate-900">{user.name}</div>

@@ -89,14 +89,14 @@ export default function Crowdsourcing() {
                     Đang tải dữ liệu...
                   </TableCell>
                 </TableRow>
-              ) : !data?.items.length ? (
+              ) : !data?.items || data.items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-24 text-slate-500">
                     Không có báo cáo nào
                   </TableCell>
                 </TableRow>
               ) : (
-                data.items.map((report) => (
+                (data?.items || []).map((report: any) => (
                   <TableRow key={report.id}>
                     <TableCell>
                       <div className="font-medium text-slate-900">{report.signCode}</div>

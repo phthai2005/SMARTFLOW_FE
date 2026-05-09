@@ -63,13 +63,13 @@ export default function Evidence() {
             <Skeleton key={i} className="aspect-video w-full rounded-xl" />
           ))}
         </div>
-      ) : !evidenceList?.items.length ? (
+      ) : !evidenceList?.items || evidenceList.items.length === 0 ? (
         <div className="text-center py-12 text-slate-500 bg-slate-50 rounded-lg border border-dashed">
           Chưa có dữ liệu hình ảnh
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {evidenceList.items.map((img) => (
+          {(evidenceList?.items || []).map((img: any) => (
             <Card key={img.id} className="overflow-hidden group">
               <div className="relative aspect-video bg-slate-100">
                 <img 

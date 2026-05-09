@@ -21,7 +21,7 @@ export default function Dashboard() {
 
   const totalReports = stats ? stats.totalPending + stats.totalApproved + stats.totalRejected : 0;
 
-  const mapPoints = (allReports?.items ?? []).map((r) => ({
+  const mapPoints = (allReports?.items || []).map((r: any) => ({
     lat: r.lat,
     lng: r.lng,
     label: `${r.signCode} - ${r.signType}`,
@@ -135,13 +135,13 @@ export default function Dashboard() {
                   <Skeleton key={i} className="h-12 w-full" />
                 ))}
               </div>
-            ) : recentReports?.items.length === 0 ? (
+            ) : !recentReports?.items || recentReports.items.length === 0 ? (
               <div className="h-[200px] flex items-center justify-center text-slate-500 text-sm">
                 Không có báo cáo nào đang chờ duyệt
               </div>
             ) : (
               <div className="space-y-4">
-                {recentReports?.items.map((report) => (
+                {(recentReports?.items || []).map((report: any) => (
                   <div key={report.id} className="flex items-center justify-between p-3 rounded-lg border bg-slate-50">
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 bg-blue-100 text-blue-700 rounded-md flex items-center justify-center font-bold">
@@ -188,7 +188,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {modelsData?.items.slice(0, 4).map((model) => (
+                {(modelsData?.items || []).slice(0, 4).map((model: any) => (
                   <div key={model.id} className="flex items-start justify-between p-3 rounded-lg border">
                     <div className="flex gap-3">
                       <div className="mt-0.5">

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFlow | Hệ thống Quản lý Giao thông</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-content login-box">
+            <div class="login-header">
+                <div class="logo-container">
+                    <i data-lucide="cpu" class="logo-icon"></i>
+                    <span>SMARTFLOW</span>
+                </div>
+                <h2>Đăng nhập hệ thống</h2>
+                <p>Vui lòng đăng nhập để tiếp tục</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Tài khoản</label>
+                    <input type="text" id="username" name="username" required placeholder="Nhập tên đăng nhập" value="admin">
+                </div>
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu" value="admin">
+                </div>
+                <div id="login-error" class="error-message" style="display: none; color: #ff4d4f; margin-bottom: 1rem; font-size: 0.875rem;"></div>
+                <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <i data-lucide="cpu" class="logo-icon"></i>
+                    <span>SMARTFLOW</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Tổng quan</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="map-pin"></i>
+                    <span>Báo cáo thực địa</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="triangle-alert"></i>
+                    <span>Biển báo lỗi</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="book-open-check"></i>
+                    <span>Cấu hình Luật</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="image"></i>
+                    <span>Kho ảnh</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="shield-alert"></i>
+                    <span>Quản lý Admin</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="users"></i>
+                    <span>Người dùng</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i data-lucide="cpu"></i>
+                    <span>Model AI</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer" style="padding: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                <a href="#" id="logout-btn" class="nav-item">
+                    <i data-lucide="log-out"></i>
+                    <span>Đăng xuất</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Wrapper -->
+        <div class="main-wrapper">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <h1>Hệ thống Quản lý Giao thông</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="icon-btn">
+                        <i data-lucide="bell"></i>
+                        <span class="notification-badge"></span>
+                    </button>
+                    <div class="user-profile">
+                        <div class="avatar">AD</div>
+                        <div class="user-info">
+                            <span class="name">Admin User</span>
+                            <span class="role">Super Admin</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="page-content">
+                <div class="page-header">
+                    <h2>Tổng quan hệ thống</h2>
+                    <p>Theo dõi tình trạng giao thông và các báo cáo vi phạm thời gian thực.</p>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon blue">
+                                <i data-lucide="file-text"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="stat-total-reports">-</div>
+                        <div class="stat-label">Tổng số báo cáo</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon orange">
+                                <i data-lucide="clock"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="stat-pending-reports">-</div>
+                        <div class="stat-label">Đang chờ duyệt</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon green">
+                                <i data-lucide="check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="stat-approved-reports">-</div>
+                        <div class="stat-label">Đã phê duyệt</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon red">
+                                <i data-lucide="x-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="stat-rejected-reports">-</div>
+                        <div class="stat-label">Đã từ chối</div>
+                    </div>
+                </div>
+
+                <!-- Bottom Grid: Map & Table -->
+                <div class="bottom-grid">
+                    <!-- Map Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Bản đồ báo cáo thời gian thực</h3>
+                            <div class="card-actions">
+                                <button class="icon-btn"><i data-lucide="maximize"></i></button>
+                            </div>
+                        </div>
+                        <div class="map-placeholder">
+                            <div class="map-ui">
+                                <button class="map-btn"><i data-lucide="plus"></i></button>
+                                <button class="map-btn"><i data-lucide="minus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Reports Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Báo cáo gần đây</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Loại lỗi</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-reports-body">
+                                    <tr>
+                                        <td colspan="3" style="text-align: center;">Đang tải dữ liệu...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="scripts/src/api.js"></script>
+    <script src="scripts/src/dashboard.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

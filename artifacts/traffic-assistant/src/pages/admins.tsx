@@ -158,14 +158,14 @@ export default function Admins() {
                     Đang tải dữ liệu...
                   </TableCell>
                 </TableRow>
-              ) : !data?.items.length ? (
+              ) : !data?.items || data.items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-24 text-slate-500">
                     Chưa có tài khoản admin nào
                   </TableCell>
                 </TableRow>
               ) : (
-                data.items.map((admin) => (
+                (data?.items || []).map((admin: any) => (
                   <TableRow key={admin.id}>
                     <TableCell>
                       <div className="font-medium text-slate-900">{admin.name}</div>

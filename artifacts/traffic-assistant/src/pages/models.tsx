@@ -134,14 +134,14 @@ export default function Models() {
                     Đang tải dữ liệu...
                   </TableCell>
                 </TableRow>
-              ) : !data?.items.length ? (
+              ) : !data?.items || data.items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center h-24 text-slate-500">
                     Chưa có Model AI nào
                   </TableCell>
                 </TableRow>
               ) : (
-                data.items.map((model) => (
+                (data?.items || []).map((model: any) => (
                   <TableRow key={model.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
