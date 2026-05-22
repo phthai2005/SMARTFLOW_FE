@@ -24,23 +24,23 @@ export default function Models() {
   const createMutation = useCreateModel();
   const deployMutation = useDeployModel();
 
-  const handleUpload = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    createMutation.mutate({
-      data: {
-        version: formData.get("version") as string,
-        filename: formData.get("filename") as string,
-        releaseNote: formData.get("releaseNote") as string,
-      }
-    }, {
-      onSuccess: () => {
-        toast({ title: "Tải lên thành công", description: "Model AI mới đã sẵn sàng để triển khai." });
-        setIsUploadOpen(false);
-        queryClient.invalidateQueries({ queryKey: getListModelsQueryKey() });
-      }
-    });
+    try {
+      const response = await fetch('/api/v1/models', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error("Upload failed");
+      
+      toast({ title: "Tải lên thành công", description: "Model AI mới đã sẵn sàng để triển khai." });
+      setIsUploadOpen(false);
+      queryClient.invalidateQueries({ queryKey: getListModelsQueryKey() });
+    } catch (err) {
+      toast({ title: "Lỗi", description: "Không thể tải lên model", variant: "destructive" });
+    }
   };
 
   const handleDeploy = (id: number) => {
@@ -95,12 +95,12 @@ export default function Models() {
                   <Input id="version" name="version" placeholder="1.2.0" className="col-span-3" required />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="filename" className="text-right">Tên file</Label>
-                  <Input id="filename" name="filename" placeholder="yolov8_traffic_v1.2.0.pt" className="col-span-3" required />
+                  <Label htmlFor="file" className="text-right">File Model</Label>
+                  <Input id="file" name="file" type="file" accept=".pt,.onnx" className="col-span-3" required />
                 </div>
                 <div className="grid grid-cols-4 items-start gap-4">
                   <Label htmlFor="releaseNote" className="text-right mt-2">Release Notes</Label>
-                  <Textarea id="releaseNote" name="releaseNote" placeholder="Cải thiện độ chính xác nhận diện biển cấm dừng đỗ..." className="col-span-3 h-24" required />
+                  <Textarea id="releaseNote" name="version_notes" placeholder="Cải thiện độ chính xác nhận diện biển cấm dừng đỗ..." className="col-span-3 h-24" required />
                 </div>
                 <div className="col-span-4 bg-slate-50 border p-3 rounded-md mt-2 flex gap-3 text-sm text-slate-600">
                   <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />

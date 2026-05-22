@@ -29,7 +29,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/crowdsourcing" component={Crowdsourcing} />
-        <Route path="/sign-reports" component={SignReports} />
+        {/* <Route path="/sign-reports" component={SignReports} /> */}
         <Route path="/rules" component={Rules} />
         <Route path="/admins" component={Admins} />
         <Route path="/users" component={Users} />

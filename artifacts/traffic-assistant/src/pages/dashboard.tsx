@@ -22,10 +22,10 @@ export default function Dashboard() {
   const totalReports = stats ? stats.totalPending + stats.totalApproved + stats.totalRejected : 0;
 
   const mapPoints = (allReports?.items || []).map((r: any) => ({
-    lat: r.lat,
-    lng: r.lng,
-    label: `${r.signCode} - ${r.signType}`,
-    status: r.status as "pending" | "approved" | "rejected",
+    lat: r.latitude || r.lat || 10.9574,
+    lng: r.longitude || r.lng || 106.8427,
+    label: `${r.signCode || "MOCK"} - ${r.signType || "Unknown"}`,
+    status: (r.status || "pending").toLowerCase() as "pending" | "approved" | "rejected",
   }));
 
   return (
@@ -108,7 +108,7 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent className="p-0 overflow-hidden rounded-b-lg">
           <Suspense fallback={<div className="h-[400px] flex items-center justify-center bg-slate-50 text-slate-400 text-sm">Đang tải bản đồ...</div>}>
-            <MapView points={mapPoints} height="400px" />
+            <MapView points={mapPoints} height="400px" center={[10.9574, 106.8427]} zoom={13} />
           </Suspense>
         </CardContent>
       </Card>
@@ -144,15 +144,15 @@ export default function Dashboard() {
                 {(recentReports?.items || []).map((report: any) => (
                   <div key={report.id} className="flex items-center justify-between p-3 rounded-lg border bg-slate-50">
                     <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 bg-blue-100 text-blue-700 rounded-md flex items-center justify-center font-bold">
-                        {report.signCode}
+                      <div className="h-10 min-w-[40px] px-2 bg-blue-100 text-blue-700 rounded-md flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        {report.signCode || "???"}
                       </div>
                       <div>
                         <p className="text-sm font-medium text-slate-900">{report.signType}</p>
                         <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
-                          <span>Độ tin cậy: {(report.confidenceScore * 100).toFixed(0)}%</span>
-                          <span>•</span>
-                          <span>{format(new Date(report.submittedAt), "dd/MM/yyyy HH:mm")}</span>
+                        <span>Độ tin cậy: {((report.avgConfidence || report.confidenceScore || 0) * 100).toFixed(0)}%</span>
+                        <span>•</span>
+                        <span>{format(new Date(report.createdAt || report.submittedAt || Date.now()), "dd/MM/yyyy HH:mm")}</span>
                         </div>
                       </div>
                     </div>

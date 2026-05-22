@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useListEvidence, useGetEvidenceStats } from "@workspace/api-client-react";
+import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { MapPin, Target, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Evidence() {
+  const [limit, setLimit] = useState(24);
   const { data: stats, isLoading: statsLoading } = useGetEvidenceStats();
-  const { data: evidenceList, isLoading: evidenceLoading } = useListEvidence({ limit: 20 });
+  const { data: evidenceList, isLoading: evidenceLoading } = useListEvidence({ limit });
 
   return (
     <div className="space-y-6">
@@ -73,7 +76,7 @@ export default function Evidence() {
             <Card key={img.id} className="overflow-hidden group">
               <div className="relative aspect-video bg-slate-100">
                 <img 
-                  src={img.imageUrl} 
+                  src={img.imageUrl || img.image_url} 
                   alt="Evidence" 
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                 />
@@ -85,21 +88,33 @@ export default function Evidence() {
                 </div>
                 <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8">
                   <div className="flex items-center text-white text-xs gap-1.5 opacity-90">
-                    <Target className="w-3 h-3" /> {img.deviceId}
+                    <Target className="w-3 h-3" /> {img.deviceId || img.device_id}
                   </div>
                 </div>
               </div>
               <CardContent className="p-3">
                 <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
                   <MapPin className="w-3 h-3" />
-                  {img.lat.toFixed(5)}, {img.lng.toFixed(5)}
+                  {(img.latitude || img.lat || 0).toFixed(5)}, {(img.longitude || img.lng || 0).toFixed(5)}
                 </div>
                 <div className="text-xs text-slate-400">
-                  {format(new Date(img.capturedAt), "dd/MM/yyyy HH:mm:ss")}
+                  {format(new Date(img.capturedAt || img.created_at || Date.now()), "dd/MM/yyyy HH:mm:ss")}
                 </div>
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {evidenceList?.items && evidenceList.items.length < (stats?.totalImages || 0) && (
+        <div className="flex justify-center pt-4">
+          <Button 
+            variant="outline" 
+            onClick={() => setLimit(prev => prev + 24)}
+            className="px-8"
+          >
+            Xem thêm hình ảnh
+          </Button>
         </div>
       )}
     </div>

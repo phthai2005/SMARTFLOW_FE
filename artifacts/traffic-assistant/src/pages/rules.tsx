@@ -178,35 +178,35 @@ export default function Rules() {
                     Đang tải dữ liệu...
                   </TableCell>
                 </TableRow>
-              ) : !data?.rules || data.rules.length === 0 ? (
+              ) : !data?.items || data.items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center h-24 text-slate-500">
                     Chưa có cấu hình luật nào
                   </TableCell>
                 </TableRow>
               ) : (
-                (data?.rules || []).map((rule: any) => (
+                (data?.items || []).map((rule: any) => (
                   <TableRow key={rule.id}>
                     <TableCell>
-                      <div className="font-bold text-slate-900">{rule.sign_code || rule.signCode}</div>
-                      <div className="text-xs font-mono bg-slate-100 px-1 py-0.5 rounded mt-1 inline-block text-slate-600">{rule.sign_type || rule.signContent}</div>
+                      <div className="font-bold text-slate-900">{rule.signCode}</div>
+                      <div className="text-xs font-mono bg-slate-100 px-1 py-0.5 rounded mt-1 inline-block text-slate-600">{rule.signContent}</div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{translateVehicleType(rule.target_vehicle_type || rule.vehicleType)}</Badge>
+                      <Badge variant="outline">{translateVehicleType(rule.vehicleType)}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-start gap-2">
                         <ShieldAlert className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                        <span className="text-sm">{rule.alert_message || rule.warningMessage}</span>
+                        <span className="text-sm">{rule.warningMessage}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={(rule.is_active ?? rule.isActive) ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500"}>
-                        {(rule.is_active ?? rule.isActive) ? "Đang chạy" : "Vô hiệu hóa"}
+                      <Badge variant="outline" className={rule.isActive ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-slate-100 text-slate-500"}>
+                        {rule.isActive ? "Đang chạy" : "Vô hiệu hóa"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-sm text-slate-500">
-                      {format(new Date(rule.updated_at || rule.updatedAt), "dd/MM/yyyy")}
+                      {format(new Date(rule.updatedAt), "dd/MM/yyyy")}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">

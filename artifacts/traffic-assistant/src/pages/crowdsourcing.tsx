@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useListCrowdsourcingReports, useUpdateCrowdsourcingReport, getListCrowdsourcingReportsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Check, X, Filter } from "lucide-react";
+import { Check, X, Filter, Eye, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,6 +15,7 @@ type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
 export default function Crowdsourcing() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,9 +76,10 @@ export default function Crowdsourcing() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50">
-                <TableHead>Mã Biển / Loại</TableHead>
-                <TableHead>Vị trí</TableHead>
-                <TableHead>Độ tin cậy</TableHead>
+                <TableHead className="w-[150px]">Mã Biển / Loại</TableHead>
+                <TableHead className="w-[100px]">Hình ảnh</TableHead>
+                <TableHead className="w-[180px]">Vị trí</TableHead>
+                <TableHead className="w-[150px]">Độ tin cậy</TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Thời gian</TableHead>
                 <TableHead className="text-right">Thao tác</TableHead>
@@ -98,22 +101,52 @@ export default function Crowdsourcing() {
               ) : (
                 (data?.items || []).map((report: any) => (
                   <TableRow key={report.id}>
-                    <TableCell>
-                      <div className="font-medium text-slate-900">{report.signCode}</div>
-                      <div className="text-xs text-slate-500">{report.signType}</div>
+                    <TableCell className="font-medium">
+                      <div className="text-slate-900 truncate max-w-[120px]">{report.signCode || "???"}</div>
+                      <div className="text-[10px] uppercase text-slate-400 mt-0.5">{report.signType || "Unknown"}</div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{report.lat.toFixed(6)}, {report.lng.toFixed(6)}</div>
+                      {report.imageUrl ? (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <div className="relative h-10 w-16 rounded overflow-hidden border bg-slate-100 cursor-pointer hover:opacity-80 transition-opacity">
+                              <img 
+                                src={report.imageUrl || report.image_url || "https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=200"} 
+                                alt="Sign" 
+                                className="h-full w-full object-cover" 
+                                onError={(e) => { (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1582231243734-2e633d6a2f89?q=80&w=200"; }}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+                                <Eye className="h-4 w-4 text-white" />
+                              </div>
+                            </div>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl p-1 overflow-hidden bg-black border-none">
+                            <img 
+                              src={report.imageUrl || report.image_url} 
+                              alt="Sign Full" 
+                              className="w-full h-auto max-h-[80vh] object-contain" 
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      ) : (
+                        <div className="h-10 w-16 rounded border bg-slate-50 flex items-center justify-center text-slate-300">
+                          <ImageIcon className="h-5 w-5" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">{(report.latitude || report.lat || 0).toFixed(6)}, {(report.longitude || report.lng || 0).toFixed(6)}</div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="h-2 w-16 bg-slate-100 rounded-full overflow-hidden">
                           <div 
-                            className={`h-full rounded-full ${report.confidenceScore > 0.8 ? 'bg-emerald-500' : report.confidenceScore > 0.5 ? 'bg-amber-500' : 'bg-red-500'}`}
-                            style={{ width: `${report.confidenceScore * 100}%` }}
+                            className={`h-full rounded-full ${(report.avgConfidence || report.confidenceScore || 0) > 0.8 ? 'bg-emerald-500' : (report.avgConfidence || report.confidenceScore || 0) > 0.5 ? 'bg-amber-500' : 'bg-red-500'}`}
+                            style={{ width: `${(report.avgConfidence || report.confidenceScore || 0) * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs font-medium">{(report.confidenceScore * 100).toFixed(0)}%</span>
+                        <span className="text-xs font-medium">{((report.avgConfidence || report.confidenceScore || 0) * 100).toFixed(0)}%</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -126,8 +159,8 @@ export default function Crowdsourcing() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{format(new Date(report.submittedAt), "dd/MM/yyyy")}</div>
-                      <div className="text-xs text-slate-500">{format(new Date(report.submittedAt), "HH:mm")}</div>
+                      <div className="text-sm">{format(new Date(report.createdAt || report.submittedAt || Date.now()), "dd/MM/yyyy")}</div>
+                      <div className="text-xs text-slate-500">{format(new Date(report.createdAt || report.submittedAt || Date.now()), "HH:mm")}</div>
                     </TableCell>
                     <TableCell className="text-right">
                       {report.status === "pending" && (
